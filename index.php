@@ -1,37 +1,72 @@
 <?php
-$botToken = getenv('8414483455:AAGs6rmmLdkx-uFCkpx3-9AEpFXEDXxEeXI');
-$chatId   = getenv('5863793961');
+// ------------------------
+// CONFIGURATION
+// ------------------------
+$wifi_name = "GELAI VOUCHER WIFI"; // Wi-Fi SSID to monitor
+$telegram_bot_token = "8414483455:AAGs6rmmLdkx-uFCkpx3-9AEpFXEDXxEeXI";
+$telegram_chat_id = "5863793961";
 
-$username = $_REQUEST['username'] ?? 'Unknown';
-$ip       = $_REQUEST['userip'] ?? $_SERVER['REMOTE_ADDR'];
-$mac      = $_REQUEST['usermac'] ?? 'Unknown';
-$site     = $_REQUEST['site'] ?? 'Office';
+// ------------------------
+// FUNCTIONS
+// ------------------------
+function sendTelegramAlert($message) {
+    global $telegram_bot_token, $telegram_chat_id;
+    $url = "https://api.telegram.org/bot$telegram_bot_token/sendMessage";
+    $data = [
+        'chat_id' => $telegram_chat_id,
+        'text' => $message
+    ];
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_exec($ch);
+    curl_close($ch);
+}
 
-$time = date("Y-m-d H:i:s");
+// ------------------------
+// RECEIVE WEBHOOK FROM OMADA
+// ------------------------
+$raw_input = file_get_contents('php://input');
+$webhook_data = json_decode($raw_input, true);
 
-$message  = "📶 Omada Voucher Login\n\n";
-$message .= "👤 User: $username\n";
-$message .= "🌐 IP: $ip\n";
-$message .= "🖥 MAC: $mac\n";
-$message .= "🏢 Site: $site\n";
-$message .= "⏰ Time: $time";
-
-$url = "https://api.telegram.org/bot{$botToken}/sendMessage";
-
-$postData = [
-    'chat_id' => $chatId,
-    'text'    => $message
+// Full response structure (for debugging/logging)
+$response = [
+    'received_raw' => $raw_input,
+    'parsed_webhook' => $webhook_data,
+    'wifi_monitored' => $wifi_name,
+    'telegram_chat_id' => $telegram_chat_id,
+    'telegram_bot_token' => substr($telegram_bot_token,0,5).'****'.substr($telegram_bot_token,-5)
 ];
 
-$options = [
-    'http' => [
-        'header'  => "Content-Type: application/x-www-form-urlencoded\r\n",
-        'method'  => 'POST',
-        'content' => http_build_query($postData),
-    ]
-];
+// ------------------------
+// PROCESS CONNECT EVENTS
+// ------------------------
+if (isset($webhook_data['eventType']) && $webhook_data['eventType'] === 'client_connected') {
+    $client = $webhook_data['client'] ?? [];
+    
+    if (isset($client['ssid']) && $client['ssid'] === $wifi_name) {
+        $mac = $client['mac'] ?? 'Unknown MAC';
+        $ip = $client['ip'] ?? 'Unknown IP';
+        $name = $client['hostname'] ?? 'Unknown Device';
+        $ap_name = $client['apName'] ?? 'Unknown AP';
+        
+        $message = "📶 New device connected to GELAI VOUCHER WIFI!\n";
+        $message .= "Name: $name\nIP: $ip\nMAC: $mac\nAP: $ap_name";
+        
+        sendTelegramAlert($message);
+        $response['alert_sent'] = true;
+    } else {
+        $response['alert_sent'] = false;
+    }
+} else {
+    $response['alert_sent'] = false;
+}
 
-$context = stream_context_create($options);
-file_get_contents($url, false, $context);
-
-echo "success";
+// ------------------------
+// RETURN FULL RESPONSE
+// ------------------------
+header('Content-Type: application/json');
+echo json_encode($response, JSON_PRETTY_PRINT);
+?>
