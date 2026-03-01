@@ -2,7 +2,7 @@
 // ------------------------
 // CONFIGURATION
 // ------------------------
-$wifi_name = "GELAI VOUCHER WIFI"; // Wi-Fi SSID to monitor
+$wifi_name = "GELAI VOUCHER WIFI"; // SSID to monitor
 $telegram_bot_token = "8414483455:AAGs6rmmLdkx-uFCkpx3-9AEpFXEDXxEeXI";
 $telegram_chat_id = "5863793961";
 
@@ -31,13 +31,16 @@ function sendTelegramAlert($message) {
 $raw_input = file_get_contents('php://input');
 $webhook_data = json_decode($raw_input, true);
 
-// Full response structure (for debugging/logging)
+// ------------------------
+// FULL RESPONSE STRUCTURE (for logging/debugging)
+// ------------------------
 $response = [
     'received_raw' => $raw_input,
     'parsed_webhook' => $webhook_data,
     'wifi_monitored' => $wifi_name,
     'telegram_chat_id' => $telegram_chat_id,
-    'telegram_bot_token' => substr($telegram_bot_token,0,5).'****'.substr($telegram_bot_token,-5)
+    'telegram_bot_token' => substr($telegram_bot_token,0,5).'****'.substr($telegram_bot_token,-5),
+    'alert_sent' => false
 ];
 
 // ------------------------
@@ -57,11 +60,8 @@ if (isset($webhook_data['eventType']) && $webhook_data['eventType'] === 'client_
         
         sendTelegramAlert($message);
         $response['alert_sent'] = true;
-    } else {
-        $response['alert_sent'] = false;
+        $response['alert_message'] = $message;
     }
-} else {
-    $response['alert_sent'] = false;
 }
 
 // ------------------------
