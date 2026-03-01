@@ -1,12 +1,12 @@
 version: "3.8"
 
 services:
-  wifi-alert:
+  omada-portal:
     build: .
-    container_name: wifi-telegram-alert
+    container_name: omada-telegram-portal
     ports:
       - "8080:80"
     environment:
-      BOT_TOKEN: "YOUR_BOT_TOKEN"
-      CHAT_ID: "YOUR_CHAT_ID"
+      BOT_TOKEN: "8414483455:AAGs6rmmLdkx-uFCkpx3-9AEpFXEDXxEeXI"
+      CHAT_ID: "5863793961"
     restart: unless-stopped
