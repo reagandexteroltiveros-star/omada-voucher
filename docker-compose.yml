@@ -3,9 +3,9 @@ version: "3.8"
 services:
   wifi-alert:
     build: .
-    container_name: wifi-alert
+    container_name: wifi-telegram-alert
     ports:
-      - "3000:3000"
+      - "8080:80"
     environment:
       BOT_TOKEN: "YOUR_BOT_TOKEN"
       CHAT_ID: "YOUR_CHAT_ID"
