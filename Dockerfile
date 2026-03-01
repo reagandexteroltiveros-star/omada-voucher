@@ -7,7 +7,7 @@ FROM php:8.2-cli
 WORKDIR /var/www/html
 
 # Copy webhook script
-COPY omada_webhook.php /var/www/html/
+COPY index.php /var/www/html/
 
 # Expose port for HTTP (Omada webhook should point here)
 EXPOSE 8080
