@@ -1,12 +1,12 @@
-version: "3.8"
-
 services:
   omada-portal:
-    build: .
+    image: php:8.2-apache
     container_name: omada-telegram-portal
     ports:
       - "8080:80"
     environment:
-      BOT_TOKEN: "8414483455:AAGs6rmmLdkx-uFCkpx3-9AEpFXEDXxEeXI"
-      CHAT_ID: "5863793961"
+      BOT_TOKEN: YOUR_TELEGRAM_BOT_TOKEN
+      CHAT_ID: YOUR_CHAT_ID
+    volumes:
+      - ./index.php:/var/www/html/index.php
     restart: unless-stopped
