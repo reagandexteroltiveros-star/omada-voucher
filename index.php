@@ -3,7 +3,7 @@
 // CONFIGURATION
 // ------------------------
 $wifi_name = "GELAI WIFI VOUCHER"; // SSID to monitor
-$telegram_bot_token = "8414483455:AAGs6rmmLdkx-uFCkpx3-9AEpFXEDXxEeXI";
+$telegram_bot_token = "8631983368:AAG3yP5ry1FbyzGFWDhFuakefLksqXR1g1E";
 $telegram_chat_id = "5863793961";
 
 // ------------------------
