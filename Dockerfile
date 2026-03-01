@@ -1,13 +1,14 @@
-FROM node:20-alpine
+FROM php:8.2-apache
 
-WORKDIR /app
+# Enable Apache mod_rewrite (optional)
+RUN a2enmod rewrite
 
-COPY package*.json ./
+# Install curl extension
+RUN docker-php-ext-install curl
 
-RUN npm install --production
+# Copy project files to Apache root
+COPY index.php /var/www/html/index.php
 
-COPY . .
+EXPOSE 80
 
-EXPOSE 3000
-
-CMD ["node", "server.js"]
+CMD ["apache2-foreground"]
