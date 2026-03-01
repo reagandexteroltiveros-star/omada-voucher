@@ -70,3 +70,7 @@ if (isset($webhook_data['eventType']) && $webhook_data['eventType'] === 'client_
 header('Content-Type: application/json');
 echo json_encode($response, JSON_PRETTY_PRINT);
 ?>
+
+<?php
+$raw_input = file_get_contents('php://input');
+file_put_contents('webhook.log', date('Y-m-d H:i:s') . " - " . $raw_input . PHP_EOL, FILE_APPEND);
