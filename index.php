@@ -1,65 +1,53 @@
 <?php
 
-// ==============================
-// CONFIGURATION
-// ==============================
-$botToken = getenv('8414483455:AAGs6rmmLdkx-uFCkpx3-9AEpFXEDXxEeXI');
+// =======================
+// CONFIG
+// =======================
+$botToken = getenv('8414483455:AAGs6rmmLdkx-uFCkpx3-9AEpFXEDXxEeX');
 $chatId   = getenv('5863793961');
 
-// ==============================
-// GET REQUEST DATA
-// ==============================
-
-// Try JSON body first
-$input = json_decode(file_get_contents("php://input"), true);
-
-// If not JSON, fallback to GET/POST
-$username = $input['username'] ?? $_REQUEST['username'] ?? 'Unknown';
-$ip       = $input['ip'] ?? $_REQUEST['ip'] ?? $_SERVER['REMOTE_ADDR'] ?? 'Unknown';
-$mac      = $input['mac'] ?? $_REQUEST['mac'] ?? 'Unknown';
+// =======================
+// GET DATA FROM OMADA
+// =======================
+$username = $_REQUEST['username'] ?? 'Unknown';
+$ip       = $_REQUEST['userip'] ?? $_SERVER['REMOTE_ADDR'];
+$mac      = $_REQUEST['usermac'] ?? 'Unknown';
+$site     = $_REQUEST['site'] ?? 'Office';
 
 $time = date("Y-m-d H:i:s");
 
-// ==============================
-// BUILD MESSAGE
-// ==============================
-$message  = "📶 WiFi Voucher Connected\n\n";
+// =======================
+// CREATE TELEGRAM MESSAGE
+// =======================
+$message  = "📶 Omada Voucher Login\n\n";
 $message .= "👤 User: $username\n";
 $message .= "🌐 IP: $ip\n";
 $message .= "🖥 MAC: $mac\n";
-$message .= "⏰ Time: $time\n";
+$message .= "🏢 Site: $site\n";
+$message .= "⏰ Time: $time";
 
-// ==============================
+// =======================
 // SEND TO TELEGRAM
-// ==============================
+// =======================
 $url = "https://api.telegram.org/bot{$botToken}/sendMessage";
 
-$postFields = [
+$postData = [
     'chat_id' => $chatId,
     'text'    => $message
 ];
 
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, $url);
-curl_setopt($ch, CURLOPT_POST, true);
-curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postFields));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-$response = curl_exec($ch);
-curl_close($ch);
-
-// ==============================
-// RESPONSE OUTPUT
-// ==============================
-header('Content-Type: application/json');
-
-echo json_encode([
-    "status" => "success",
-    "message" => "Telegram alert sent",
-    "data" => [
-        "username" => $username,
-        "ip" => $ip,
-        "mac" => $mac,
-        "time" => $time
+$options = [
+    'http' => [
+        'header'  => "Content-Type: application/x-www-form-urlencoded\r\n",
+        'method'  => 'POST',
+        'content' => http_build_query($postData),
     ]
-]);
+];
+
+$context = stream_context_create($options);
+file_get_contents($url, false, $context);
+
+// =======================
+// RETURN SUCCESS TO OMADA
+// =======================
+echo "success";
